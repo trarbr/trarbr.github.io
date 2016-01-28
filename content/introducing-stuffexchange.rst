@@ -3,6 +3,7 @@ Introducing StuffExchange
 
 :date: 2015-04-11
 :category: StuffExchange
+:summary: A project I'll work on to learn F#
 
 StuffExchange is the name of my current project. It serves two purposes:
 
@@ -23,7 +24,7 @@ and post it to StuffExchange. Need something, but want it for free?  Search
 StuffExchange, could be someone wants to get rid of just that thing.
 
 I have a two-year old daughter. As a baby, she would grow too big for her
-clothes in three weeks. Crazy. Toys? Might be fun for a week. 
+clothes in three weeks. Crazy. Toys? Might be fun for a week.
 
 If my girlfriend didn't have a knack for finding things for free (or at least
 cheap) we would've been ruined a long time ago.  And if she didn't have a way
@@ -46,7 +47,7 @@ and not so much on the science thing. Understanding business needs, project
 management, writing code that gets the job done. Which I quite like. So far
 we've worked with things like:
 
-- Object oriented programming (C# on .NET, 98% desktop apps with WPF but also 
+- Object oriented programming (C# on .NET, 98% desktop apps with WPF but also
   a little WCF and ASP.NET Web Forms)
 - Microsoft SQL Server
 - Object oriented analysis and design (as in Craig Larmans "Applying UML and
@@ -55,7 +56,7 @@ we've worked with things like:
 - Business plans
 
 But this semester is about specialization, and what I want to do is explore
-some more "exotic" topics. Well, they aren't really that exotic, but compared 
+some more "exotic" topics. Well, they aren't really that exotic, but compared
 to the "tried and true" focus of the curriculum, what I want to do is quite
 different. Here's what I'm learning/practicing with StuffExchange:
 

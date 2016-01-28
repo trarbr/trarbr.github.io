@@ -4,6 +4,7 @@ Intro to NancyFx with F#
 :date: 2015-04-11
 :category: StuffExchange
 :tags: F#, FSharp, NancyFx, Nancy
+:summary: Get started with NancyFx in F#!
 
 `NancyFx`_ (or just Nancy) is a web application framework for .Net and Mono. I
 chose it for `StuffExchange`_ over Web API because of the focus on Mono
@@ -43,17 +44,17 @@ The template has a couple of files, but the most interesting one is `Program.fs`
 .. code-block:: fsharp
 
     module NancyIntro.Program
-    
+
     open System
     open Nancy.Hosting.Self
-    
+
     [<EntryPoint>]
     let main args =
         let uri = Uri("http://localhost:3579")
-    
+
         use host = new NancyHost(uri)
         host.Start()
-    
+
         Console.WriteLine("Your application is running on " + uri.AbsoluteUri)
         Console.WriteLine("Press any [Enter] to close the host.")
         Console.ReadLine() |> ignore
@@ -63,15 +64,15 @@ I suggest you try building and running the app immediately. I get a
 ``HttpListenerException``: permission denied. This is because Nancy by default
 rewrites localhost URI's to listen on all interfaces, which my system does not
 allow. This can be fixed by creating a ``HostConfiguration`` and setting
-``RewriteLocalhost`` to ``false``: 
+``RewriteLocalhost`` to ``false``:
 
 .. code-block:: fsharp
 
     module NancyIntro.Program
-    
+
     open System
     open Nancy.Hosting.Self
-    
+
     [<EntryPoint>]
     let main args =
         let uri = Uri("http://localhost:3579")
@@ -119,24 +120,24 @@ The entire `Program.fs` file now looks like below. You can also checkout the
 .. code-block:: fsharp
 
     module NancyIntro.Program
-    
+
     open System
     open Nancy
     open Nancy.Hosting.Self
-    
+
     type IndexModule() as x =
         inherit NancyModule()
         do x.Get.["/"] <- fun _ -> box "hello world"
-    
+
     [<EntryPoint>]
     let main args =
         let uri = Uri("http://localhost:3571")
         let configuration = HostConfiguration()
         configuration.RewriteLocalhost <- false
-    
+
         use host = new NancyHost(configuration, uri)
         host.Start()
-    
+
         Console.WriteLine("Your application is running on " + uri.AbsoluteUri)
         Console.WriteLine("Press any [Enter] to close the host.")
         Console.ReadLine() |> ignore
