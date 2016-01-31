@@ -2,6 +2,7 @@ Phoenix transport adapters, part 1
 ==================================
 
 :date: 2016-01-30
+:modified: 2016-01-31
 :category: Phoenix
 :tags: Elixir, Phoenix, Channel, Transport, Telly
 :summary: a quick look at the machinery of Phoenix transport adapters
@@ -70,8 +71,8 @@ Next, you need to write the actual transport adapter. It must be able to:
   Your adapter must have some means of identifying the socket handler.
   This is mostly done using the socket path,
   which will be specified by the connecting client [#]_.
-  In addition, before calling ``connect/2`` on the socket handler,
-  the adapter must also obtain any paramters to be passed to ``connect/2``.
+  In addition to the socket handler,
+  the adapter must also obtain any parameters needed when connecting.
 - once connected,
   decode and dispatch incoming messages from the client.
   The actual dispatch is done by the Phoenix.Socket.Transport module.
