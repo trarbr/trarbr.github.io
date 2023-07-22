@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+      <title>Troels Brødsgaard</title>
+      <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,600,700' rel='stylesheet' type='text/css' />
+      <link href='//fonts.googleapis.com/css?family=Merriweather:300' rel='stylesheet' type='text/css'/>
+      <link href='//fonts.googleapis.com/css?family=Source+Code+Pro:200,400,700' rel='stylesheet' type='text/css'/>
+      <link rel="stylesheet" type="text/css" href="./theme/css/icons.min.css"/>
+      <link rel="stylesheet" type="text/css" href="./theme/css/styles.min.css"/>
+      <meta charset="utf-8" />
+  </head>
+
+  <body id="index">
+    <!-- header -->
+    <header class="siteheader">
+      <!-- site image -->
+
+      <div class = "sitebanner">
+	      <h2><a class="sitetitle nodec" href="."><span class="bold-initial">Troels Brødsgaard</span></a></h2>
+        <h3 class ="sitesubtitle">Blurbs on programming</h3>
+        <!-- nav -->
+        <nav class="menu">
+          <ul>
+            <!-- menu items-->
+            <!--pages-->
+            <!-- services icons -->
+              <li><a class="nodec icon-mail-alt" href="mailto:tr@arbr.dk"></a></li>
+              <li><a class="nodec icon-github" href="https://github.com/trarbr"></a></li>
+              <li><a class="nodec icon-twitter"  href="https://twitter.com/trarbr"></a></li>
+          </ul>
+        </nav>
+      </div> <!-- sitebanner -->
+    </header>
+
+    <!-- content -->
+
+<section class="content">
+
+  <h3 class="posttitle">
+    <a class="nodec" href="/phoenix-transport-adapters-part-2.html" rel="bookmark" title="Permalink to Phoenix transport adapters, part 2">
+      Phoenix transport adapters, part 2
+    </a>
+  </h3>
+
+  <div class="postinfo">
+    <p class="published" title="2016-01-31T00:00:00+01:00">
+      Sun 31 January 2016
+    </p>
+
+  </div><!-- .postinfo -->
+
+  <div class="article">
+    <p>This post is an introduction to <a class="reference external" href="https://github.com/trarbr/telly">Telly</a>,
+a proof-of-concept transport adapter for the Phoenix framework.
+I will show you how I put it together,
+and give pointers on how you can customize it to fit your needs.
+Let me know if there's anything extra you'd like me to write about.
+For part one of this series,
+where I talk about Phoenix transport adapters in general,
+take a look <a class="reference external" href="./phoenix-transport-adapters-part-1.html">here</a>.</p>
+<p>If you want to take Telly for a quick spin,
+you can use a slightly <a class="reference external" href="https://github.com/trarbr/phoenix_chat_example">modified version</a> of the simple chat example.
+I have also recorded a <a class="reference external" href="https://youtu.be/uV6Sx7vQqbI">small video demo</a> showing the functionality.</p>
+<p>In the first part of this series we saw that every transport adapter
+consists of a server and a handler.
+Let's look at these.</p>
+<div class="section" id="the-telly-server">
+<h2>The Telly server</h2>
+<p>In Telly's case, I'm using <a class="reference external" href="https://github.com/ninenines/ranch">ranch</a> as my server.
+ranch is an embeddable TCP server and acceptor pool,
+and is also used by Cowboy.
+Telly.Supervisor
+(which a Telly user must add to the application supervision tree)
+is responsible for setting up ranch.</p>
+<p>Let's walk through the <tt class="docutils literal">init/1</tt> function of Telly.Supervisor:</p>
+<div class="highlight"><pre><span></span><span class="kd">def</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="n">socket_handlers</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">{</span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="n">socket</span><span class="p">}</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">endpoint</span><span class="o">.</span><span class="n">__sockets__</span><span class="p">,</span>
+<span class="w">        </span><span class="p">{</span><span class="n">_transport</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="n">config</span><span class="p">}}</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">socket</span><span class="o">.</span><span class="n">__transports__</span><span class="p">,</span>
+<span class="w">        </span><span class="n">transport_handler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">config</span><span class="p">[</span><span class="ss">:telly</span><span class="p">],</span>
+<span class="w">        </span><span class="n">serializer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Keyword</span><span class="o">.</span><span class="n">fetch!</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="ss">:serializer</span><span class="p">),</span>
+<span class="w">        </span><span class="ss">into</span><span class="p">:</span><span class="w"> </span><span class="p">%</span><span class="nc">HashDict</span><span class="p">{},</span>
+<span class="w">        </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">socket</span><span class="p">,</span><span class="w"> </span><span class="n">serializer</span><span class="p">}}</span>
+
+<span class="w">  </span><span class="n">telly_spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">:ranch</span><span class="o">.</span><span class="n">child_spec</span><span class="p">(</span><span class="n">make_ref</span><span class="p">(),</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="ss">:ranch_tcp</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="ss">port</span><span class="p">:</span><span class="w"> </span><span class="mi">5555</span><span class="p">],</span><span class="w"> </span><span class="nc">Telly.Transport</span><span class="p">,</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="ss">endpoint</span><span class="p">:</span><span class="w"> </span><span class="n">endpoint</span><span class="p">,</span>
+<span class="w">    </span><span class="ss">handlers</span><span class="p">:</span><span class="w"> </span><span class="n">socket_handlers</span>
+<span class="w">  </span><span class="p">])</span>
+<span class="w">  </span><span class="n">children</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">telly_spec</span><span class="p">]</span>
+
+<span class="w">  </span><span class="nc">Logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running Telly on port 5555&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="n">supervise</span><span class="p">(</span><span class="n">children</span><span class="p">,</span><span class="w"> </span><span class="ss">strategy</span><span class="p">:</span><span class="w"> </span><span class="ss">:one_for_one</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+<p>First off,
+the supervisor enumerates the list of sockets defined in the endpoint.
+For each socket,
+it will check if there is a transport with a <tt class="docutils literal">:telly</tt> transport handler.
+If <tt class="docutils literal">transport_handler</tt> is not nil,
+the socket path is added to a HashDict as key,
+with the socket and serializer as the value.
+The resulting HashDict is saved in <tt class="docutils literal">socket_handlers</tt>.</p>
+<p>Next,
+Telly.Supervisor creates a child spec for ranch.
+Among other things, the child spec tells ranch which port to listen on,
+and which module to use as ranch transport (:ranch_tcp).
+It also specifies the module of the ranch protocol,
+which in this case is Telly.Transport,
+Telly's custom ranch protocol.</p>
+<p>The last argument is a keyword list.
+It will be passed to the ranch protocol when starting it up.</p>
+<p>Once the child spec has been generated,
+I call supervise/2 to start ranch.</p>
+</div>
+<div class="section" id="the-telly-handler">
+<h2>The Telly handler</h2>
+<p>When ranch accepts a new connection it calls <tt class="docutils literal">start_link/4</tt>
+in the ranch protocol module -
+here it will create a new Telly.Transport process.
+Telly.Transport is implemented as a GenServer.
+It does quite a bit more work than Telly.Supervisor,
+so I'll skim over some parts.</p>
+<p>First, <tt class="docutils literal">start_link/4</tt> invokes <tt class="docutils literal">init/4</tt>:</p>
+<div class="highlight"><pre><span></span><span class="kd">def</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span><span class="w"> </span><span class="n">tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="n">tcp_transport</span><span class="p">,</span><span class="w"> </span><span class="n">opts</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">:proc_lib</span><span class="o">.</span><span class="n">init_ack</span><span class="p">({</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="p">()})</span>
+<span class="w">  </span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">:ranch</span><span class="o">.</span><span class="n">accept_ack</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+<span class="w">  </span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tcp_transport</span><span class="o">.</span><span class="n">setopts</span><span class="p">(</span><span class="n">tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="p">[{</span><span class="ss">:active</span><span class="p">,</span><span class="w"> </span><span class="ss">:once</span><span class="p">}])</span>
+<span class="w">  </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">%{</span>
+<span class="w">    </span><span class="ss">tcp_transport</span><span class="p">:</span><span class="w"> </span><span class="n">tcp_transport</span><span class="p">,</span><span class="w"> </span><span class="c1"># ranch_tcp in this case</span>
+<span class="w">    </span><span class="ss">tcp_socket</span><span class="p">:</span><span class="w"> </span><span class="n">tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="c1"># the socket established by ranch</span>
+<span class="w">    </span><span class="ss">endpoint</span><span class="p">:</span><span class="w"> </span><span class="nc">Keyword</span><span class="o">.</span><span class="n">fetch!</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span><span class="w"> </span><span class="ss">:endpoint</span><span class="p">),</span><span class="w"> </span><span class="c1"># the Phoenix Endpoint</span>
+<span class="w">    </span><span class="ss">handlers</span><span class="p">:</span><span class="w"> </span><span class="nc">Keyword</span><span class="o">.</span><span class="n">fetch!</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span><span class="w"> </span><span class="ss">:handlers</span><span class="p">),</span><span class="w"> </span><span class="c1"># all sockets with a :telly handler</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="ss">:gen_server</span><span class="o">.</span><span class="n">enter_loop</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="p">[],</span><span class="w"> </span><span class="n">state</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+<p>The <tt class="docutils literal">init/4</tt> function accepts the TCP socket from ranch,
+and creates an initial state with the name of the endpoint,
+and the <tt class="docutils literal">socket_handlers</tt> HashMap created above.
+After this,
+it enters the GenServer loop,
+and waits for new messages.
+At this point the TCP connection has been established,
+but we still don't know which socket handler to use for the connection.</p>
+<p>The Telly handler receives a new message when the client sends a new line.
+This is first processed by ranch_tcp,
+which then sends a message to the Telly handler.
+This message invokes <tt class="docutils literal">handle_info/2</tt>:</p>
+<div class="highlight"><pre><span></span><span class="kd">def</span><span class="w"> </span><span class="n">handle_info</span><span class="p">({</span><span class="ss">:tcp</span><span class="p">,</span><span class="w"> </span><span class="n">_tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">},</span><span class="w"> </span><span class="p">%{</span><span class="ss">handlers</span><span class="p">:</span><span class="w"> </span><span class="n">handlers</span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="nc">HashDict</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">handlers</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="p">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">handler</span><span class="p">,</span><span class="w"> </span><span class="n">serializer</span><span class="p">}}</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">      </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">%{</span>
+<span class="w">        </span><span class="ss">tcp_transport</span><span class="p">:</span><span class="w"> </span><span class="n">state</span><span class="o">.</span><span class="n">tcp_transport</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">tcp_socket</span><span class="p">:</span><span class="w"> </span><span class="n">state</span><span class="o">.</span><span class="n">tcp_socket</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">endpoint</span><span class="p">:</span><span class="w"> </span><span class="n">state</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">handler</span><span class="p">:</span><span class="w"> </span><span class="n">handler</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">serializer</span><span class="p">:</span><span class="w"> </span><span class="n">serializer</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="o">.</span><span class="n">tcp_transport</span><span class="o">.</span><span class="n">setopts</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="ss">active</span><span class="p">:</span><span class="w"> </span><span class="ss">:once</span><span class="p">])</span>
+<span class="w">      </span><span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">}</span>
+<span class="w">    </span><span class="ss">:error</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">      </span><span class="p">{</span><span class="ss">:stop</span><span class="p">,</span><span class="w"> </span><span class="ss">:shutdown</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">}</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+<p><tt class="docutils literal">data</tt> is a binary containing the bytes sent from the client.
+This is expected to be a socket path,
+and is used to fetch the corresponding socket handler and serializer.
+These two are then added to the process state.</p>
+<p>The Telly handler now know which socket handler to call connect to,
+but need to wait for the parameters.
+These are expected to arrive as a JSON string in the next message:</p>
+<div class="highlight"><pre><span></span><span class="kd">def</span><span class="w"> </span><span class="n">handle_info</span><span class="p">({</span><span class="ss">:tcp</span><span class="p">,</span><span class="w"> </span><span class="n">tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">},</span><span class="w"> </span><span class="p">%{</span><span class="ss">tcp_transport</span><span class="p">:</span><span class="w"> </span><span class="n">tcp_transport</span><span class="p">,</span><span class="w"> </span><span class="ss">endpoint</span><span class="p">:</span><span class="w"> </span><span class="n">endpoint</span><span class="p">,</span><span class="w"> </span><span class="ss">handler</span><span class="p">:</span><span class="w"> </span><span class="n">handler</span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="n">params</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nc">String</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Poison</span><span class="o">.</span><span class="n">decode!</span><span class="p">()</span>
+
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="nc">Phoenix.Socket.Transport</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span><span class="w"> </span><span class="n">handler</span><span class="p">,</span><span class="w"> </span><span class="ss">:telnet</span><span class="p">,</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="o">.</span><span class="n">serializer</span><span class="p">,</span><span class="w"> </span><span class="n">params</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="p">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">socket</span><span class="p">}</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">      </span><span class="nc">Process</span><span class="o">.</span><span class="n">flag</span><span class="p">(</span><span class="ss">:trap_exit</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">)</span><span class="w"> </span><span class="c1"># trap exits to avoid crashing if a channel process dies</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="n">socket</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">socket</span><span class="o">.</span><span class="n">endpoint</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">self</span><span class="p">(),</span><span class="w"> </span><span class="n">socket</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="ss">link</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p">)</span>
+<span class="w">      </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">%{</span>
+<span class="w">        </span><span class="ss">tcp_transport</span><span class="p">:</span><span class="w"> </span><span class="n">tcp_transport</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">tcp_socket</span><span class="p">:</span><span class="w"> </span><span class="n">tcp_socket</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">socket</span><span class="p">:</span><span class="w"> </span><span class="n">socket</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">channels</span><span class="p">:</span><span class="w"> </span><span class="nc">HashDict</span><span class="o">.</span><span class="n">new</span><span class="p">(),</span>
+<span class="w">        </span><span class="ss">channels_inverse</span><span class="p">:</span><span class="w"> </span><span class="nc">HashDict</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tcp_transport</span><span class="o">.</span><span class="n">setopts</span><span class="p">(</span><span class="n">tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="ss">active</span><span class="p">:</span><span class="w"> </span><span class="ss">:once</span><span class="p">])</span>
+<span class="w">      </span><span class="n">tcp_transport</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ok</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">}</span>
+<span class="w">    </span><span class="ss">:error</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">      </span><span class="n">tcp_transport</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;error</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span><span class="ss">:stop</span><span class="p">,</span><span class="w"> </span><span class="ss">:shutdown</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">}</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+<p>The Telly handler now knows everything needed connect.
+This is done by calling <tt class="docutils literal">Phoenix.Socket.Transport.connect/6</tt>.
+<tt class="docutils literal">Phoenix.Socket.Transport.connect/6</tt> calls <tt class="docutils literal">connect/2</tt> on the socket handler,
+and returns a Phoenix.Socket struct if successful.
+This struct is added to the process state,
+as well as two HashDicts for keeping track of the joined channels.
+The Telly handler now sends an &quot;ok&quot; message to the client.</p>
+<p>Now, the only thing left is handling messages.
+Incoming messages are handled like this:</p>
+<div class="highlight"><pre><span></span><span class="kd">def</span><span class="w"> </span><span class="n">handle_info</span><span class="p">({</span><span class="ss">:tcp</span><span class="p">,</span><span class="w"> </span><span class="n">_tcp_socket</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">},</span><span class="w"> </span><span class="p">%{</span><span class="ss">socket</span><span class="p">:</span><span class="w"> </span><span class="n">socket</span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nc">String</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">socket</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">decode!</span><span class="p">([])</span>
+
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="nc">Phoenix.Socket.Transport</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="o">.</span><span class="n">channels</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="o">.</span><span class="n">socket</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="ss">:noreply</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">      </span><span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">}</span>
+<span class="w">    </span><span class="p">{</span><span class="ss">:reply</span><span class="p">,</span><span class="w"> </span><span class="n">reply_msg</span><span class="p">}</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">      </span><span class="n">encode_reply</span><span class="p">(</span><span class="n">reply_msg</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span><span class="ss">:joined</span><span class="p">,</span><span class="w"> </span><span class="n">channel_pid</span><span class="p">,</span><span class="w"> </span><span class="n">reply_msg</span><span class="p">}</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">      </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">put</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="o">.</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">channel_pid</span><span class="p">)</span>
+<span class="w">      </span><span class="n">encode_reply</span><span class="p">(</span><span class="n">reply_msg</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="n">_reason</span><span class="p">,</span><span class="w"> </span><span class="n">error_reply_msg</span><span class="p">}</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">      </span><span class="n">encode_reply</span><span class="p">(</span><span class="n">error_reply_msg</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">)</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+<p>Very simple, right? <tt class="docutils literal">encode_reply/2</tt> simply encodes the message,
+sends it to the client,
+and returns a <tt class="docutils literal">{:noreply, state}</tt> tuple to the GenServer.</p>
+<p>Outgoing messages are handled like this:</p>
+<div class="highlight"><pre><span></span><span class="kd">def</span><span class="w"> </span><span class="n">handle_info</span><span class="p">({</span><span class="ss">:socket_push</span><span class="p">,</span><span class="w"> </span><span class="n">_encoding</span><span class="p">,</span><span class="w"> </span><span class="n">_encoded_payload</span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="n">reply</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+<p>That was pretty much a complete tour of Telly.
+There are a few more bits,
+but I'll leave you to explore those on your own.
+Let me know if you want me to write about any of it.</p>
+</div>
+<div class="section" id="customization-and-tradeoffs">
+<h2>Customization and tradeoffs</h2>
+<p>As noted, Telly is just a proof of concept.
+I wrote it to learn how transport adapters work,
+and what is needed to make my own.
+I have made plenty of tradeoffs in the name of keeping things simple,
+so I will end this post by talking about what can be improved,
+or just different,
+depending on your use case.</p>
+<p>First,
+Telly is hardcoded to listen on port 5555.
+It's probably a good idea to make that configurable,
+so it can be specified in the applications config.</p>
+<p>Second,
+the transport handler for Telly is hardcoded to be Telly.Transport.
+In fact,
+the application developer should be choose the handler for a transport,
+on a socket by socket basis.
+This is done by specifying a different handler in the <tt class="docutils literal">transport/2</tt> macro.
+To accomodate this, the current handler should be split in two parts:
+a broker, and the actual handler.
+The job of the broker is to wait for the client to specify the socket path.
+The transport handler can be deduced from the the socket path.
+All further messages should be dispatched to that handler.
+The transport handler must be added to <tt class="docutils literal">socket_handlers</tt> in Telly.Supervisor.</p>
+<p>Third,
+if you are implementing a transport adapter for a specific protocol,
+you may not be able to specify a path and parameters with custom messages.
+For example,
+the MQTT protocol does not expect different kinds of handlers,
+and the client will send username and password in the first packet.
+In this case, you might need to listen on separate ports for each socket,
+so you know that a connection on port X is for socket handler Y.
+That means you need a separate ranch child spec for each socket.
+It also means the port should be specified as an option in the transport macro,
+and not through the global configuration.</p>
+<p>Fourth,
+Telly depends on the connection parameters being specified as JSON.
+This might not apply in your situation.
+In the MQTT example,
+you'd probably extract these from the username and password fields.</p>
+<p>Fifth,
+it's not very Telnet-like to send JSON strings back and forth.
+It would be more typical to send commands.
+Something like: &quot;CONNECT {{socket path}} {{params}}&quot;, &quot;JOIN {{topic string}}&quot;
+and &quot;BROADCAST {{topic string}} {{message}}&quot; might be more fitting.</p>
+<p>Lastly,
+I have not yet tested Telly with long strings.
+What happens if the message is longer than a TCP packet?
+Does ranch wait for a new packet and parse it until the line break,
+or will Telly have to handle this?
+I don't know!</p>
+<p>That concludes this series for now.
+I'm not sure what I'll do with Telly now.
+Part of me wants to address points 1, 2 and 5 and 6 above,
+to build a better Telnet transport adapter.
+On the other hand,
+I want to try and tackle MQTT.
+Unfortunately,
+I have to put it on the back burner for a while,
+but let me know if you have any requests,
+or any feedback in general.</p>
+</div>
+
+  </div><!-- .content -->
+
+</section>
+
+
+    <!-- footer -->
+    <footer>
+      <p>
+        © Troels Brødsgaard, license <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0</a> Unless otherwise noted.
+        Generated by <a href= "https://docs.getpelican.com/">Pelican</a> with
+        <a href="https://github.com/porterjamesj/crowsfoot">crowsfoot</a> theme.
+      </p>
+    </footer>
+  </body>
+</html>

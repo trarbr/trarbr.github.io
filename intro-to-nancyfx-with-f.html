@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+      <title>Troels Brødsgaard</title>
+      <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,600,700' rel='stylesheet' type='text/css' />
+      <link href='//fonts.googleapis.com/css?family=Merriweather:300' rel='stylesheet' type='text/css'/>
+      <link href='//fonts.googleapis.com/css?family=Source+Code+Pro:200,400,700' rel='stylesheet' type='text/css'/>
+      <link rel="stylesheet" type="text/css" href="./theme/css/icons.min.css"/>
+      <link rel="stylesheet" type="text/css" href="./theme/css/styles.min.css"/>
+      <meta charset="utf-8" />
+  </head>
+
+  <body id="index">
+    <!-- header -->
+    <header class="siteheader">
+      <!-- site image -->
+
+      <div class = "sitebanner">
+	      <h2><a class="sitetitle nodec" href="."><span class="bold-initial">Troels Brødsgaard</span></a></h2>
+        <h3 class ="sitesubtitle">Blurbs on programming</h3>
+        <!-- nav -->
+        <nav class="menu">
+          <ul>
+            <!-- menu items-->
+            <!--pages-->
+            <!-- services icons -->
+              <li><a class="nodec icon-mail-alt" href="mailto:tr@arbr.dk"></a></li>
+              <li><a class="nodec icon-github" href="https://github.com/trarbr"></a></li>
+              <li><a class="nodec icon-twitter"  href="https://twitter.com/trarbr"></a></li>
+          </ul>
+        </nav>
+      </div> <!-- sitebanner -->
+    </header>
+
+    <!-- content -->
+
+<section class="content">
+
+  <h3 class="posttitle">
+    <a class="nodec" href="/intro-to-nancyfx-with-f.html" rel="bookmark" title="Permalink to Intro to NancyFx with F#">
+      Intro to NancyFx with F#
+    </a>
+  </h3>
+
+  <div class="postinfo">
+    <p class="published" title="2015-04-11T00:00:00+02:00">
+      Sat 11 April 2015
+    </p>
+
+  </div><!-- .postinfo -->
+
+  <div class="article">
+    <p><a class="reference external" href="http://nancyfx.org/">NancyFx</a> (or just Nancy) is a web application framework for .Net and Mono. I
+chose it for <a class="reference external" href="./introducing-stuffexchange.html">StuffExchange</a> over Web API because of the focus on Mono
+compatibility, but didn't really spend much time evaluating it. I'm pretty fond
+of it, but unfortunately the documentation is a bit lacking.</p>
+<p>To be sure, NancyFx does have documentation, but it's spread pretty thin and is
+all C#. That shouldn't be a problem since F# has full C# interoperability, but
+as I'm just learning F#, it makes things a bit trickier. Michal Frank wrote the
+best <a class="reference external" href="http://www.mfranc.com/f/f-and-nancy-beyond-hello-world/">F# centered introduction</a> I could find (unfortunately the code snippets
+seem to be missing right now).</p>
+<div class="section" id="getting-started">
+<h2>Getting started</h2>
+<p>The first thing I suggest you do is install the Visual Studio <a class="reference external" href="https://visualstudiogallery.msdn.microsoft.com/b55b8aac-b11a-4a6a-8a77-2153f46f4e2f">F# Nancy
+Templates</a> (and <a class="reference external" href="https://visualstudiogallery.msdn.microsoft.com/f1dae7fe-1ecc-4f1b-86b5-32a2970d012a">F# Web Item Templates</a>). Then open Visual Studio, create a
+new project and choose the <cite>F# Nancy Applications</cite> template. I pick <cite>Empty
+Self-Host</cite>.</p>
+<p>Note that the versions of Nancy referenced in <cite>packages.config</cite> might be out of
+date - in my case I get Nancy version 0.17 while Nancy is at 1.1. So I suggest
+you go to the Package Manager Console (Tools &gt;&gt; NuGet Package Manager &gt;&gt;
+Package Manager Console) and type <tt class="docutils literal"><span class="pre">Update-Package</span></tt> which will update all
+packages in the project.</p>
+<p>The template has a couple of files, but the most interesting one is <cite>Program.fs</cite>:</p>
+<div class="highlight"><pre><span></span><span class="k">module</span><span class="w"> </span><span class="nn">NancyIntro.Program</span>
+
+<span class="k">open</span><span class="w"> </span><span class="nn">System</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">Nancy.Hosting.Self</span>
+
+<span class="o">[&lt;</span><span class="n">EntryPoint</span><span class="o">&gt;]</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">main</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">uri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Uri</span><span class="o">(</span><span class="s">&quot;http://localhost:3579&quot;</span><span class="o">)</span>
+
+<span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">NancyHost</span><span class="o">(</span><span class="n">uri</span><span class="o">)</span>
+<span class="w">    </span><span class="n">host</span><span class="o">.</span><span class="n">Start</span><span class="bp">()</span>
+
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="o">(</span><span class="s">&quot;Your application is running on &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">uri</span><span class="o">.</span><span class="n">AbsoluteUri</span><span class="o">)</span>
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="o">(</span><span class="s">&quot;Press any [Enter] to close the host.&quot;</span><span class="o">)</span>
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">ReadLine</span><span class="bp">()</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">ignore</span>
+<span class="w">    </span><span class="mi">0</span>
+</pre></div>
+<p>I suggest you try building and running the app immediately. I get a
+<tt class="docutils literal">HttpListenerException</tt>: permission denied. This is because Nancy by default
+rewrites localhost URI's to listen on all interfaces, which my system does not
+allow. This can be fixed by creating a <tt class="docutils literal">HostConfiguration</tt> and setting
+<tt class="docutils literal">RewriteLocalhost</tt> to <tt class="docutils literal">false</tt>:</p>
+<div class="highlight"><pre><span></span><span class="k">module</span><span class="w"> </span><span class="nn">NancyIntro.Program</span>
+
+<span class="k">open</span><span class="w"> </span><span class="nn">System</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">Nancy.Hosting.Self</span>
+
+<span class="o">[&lt;</span><span class="n">EntryPoint</span><span class="o">&gt;]</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">main</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">uri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Uri</span><span class="o">(</span><span class="s">&quot;http://localhost:3579&quot;</span><span class="o">)</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HostConfiguration</span><span class="bp">()</span>
+<span class="w">    </span><span class="n">configuration</span><span class="o">.</span><span class="n">RewriteLocalhost</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">false</span>
+
+<span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">NancyHost</span><span class="o">(</span><span class="n">configuration</span><span class="o">,</span><span class="w"> </span><span class="n">uri</span><span class="o">)</span>
+<span class="w">    </span><span class="n">host</span><span class="o">.</span><span class="n">Start</span><span class="bp">()</span>
+
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="o">(</span><span class="s">&quot;Your application is running on &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">uri</span><span class="o">.</span><span class="n">AbsoluteUri</span><span class="o">)</span>
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="o">(</span><span class="s">&quot;Press any [Enter] to close the host.&quot;</span><span class="o">)</span>
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">ReadLine</span><span class="bp">()</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">ignore</span>
+<span class="w">    </span><span class="mi">0</span>
+</pre></div>
+<p>If you now get a different <tt class="docutils literal">HttpListenerException</tt> (can't access file) I
+suggest changing the port number in the URI - it's probably because something
+else is using that port.</p>
+<p>Once it builds and runs, the terminal will show you which address you can
+access it on. Point your browser there - you should get a 404 error, since we
+haven't defined any routes yet.</p>
+<p>Defining a route is pretty easy - you define a type, inherit from
+<tt class="docutils literal">NancyModule</tt> and then provide the routes for that module. Add below code
+snippet above the <tt class="docutils literal">main</tt> function (you will also need to <tt class="docutils literal">open Nancy</tt> to
+get access to <tt class="docutils literal">NancyModule</tt>):</p>
+<div class="highlight"><pre><span></span><span class="k">type</span><span class="w"> </span><span class="nc">IndexModule</span><span class="bp">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">inherit</span><span class="w"> </span><span class="n">NancyModule</span><span class="bp">()</span>
+<span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="n">x</span><span class="o">.</span><span class="n">Get</span><span class="o">.[</span><span class="s">&quot;/&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">fun</span><span class="w"> </span><span class="o">_</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">box</span><span class="w"> </span><span class="s">&quot;hello world&quot;</span>
+</pre></div>
+<p>Looks like <tt class="docutils literal">Get</tt> is a property that returns a dictionary-like object! And it
+stores functions! Here we store a function that simply returns <cite>hello world</cite> at
+the route <cite>/</cite>. You can now build and run your app again and fire up your
+browser. Go to <a class="reference external" href="http://localhost:3579">http://localhost:3579</a> (or whatever address Nancy listens on) and
+you should get a plain &quot;hello world&quot; response instead of the 404.</p>
+<p>The entire <cite>Program.fs</cite> file now looks like below. You can also checkout the
+<a class="reference external" href="https://github.com/trarbr/trarbr.github.io/tree/62ee08f0a653e58cf177cdb505c5bb1c6d29b0c5/src/NancyIntro">entire NancyIntro project</a>.</p>
+<div class="highlight"><pre><span></span><span class="k">module</span><span class="w"> </span><span class="nn">NancyIntro.Program</span>
+
+<span class="k">open</span><span class="w"> </span><span class="nn">System</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">Nancy</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">Nancy.Hosting.Self</span>
+
+<span class="k">type</span><span class="w"> </span><span class="nc">IndexModule</span><span class="bp">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">inherit</span><span class="w"> </span><span class="n">NancyModule</span><span class="bp">()</span>
+<span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="n">x</span><span class="o">.</span><span class="n">Get</span><span class="o">.[</span><span class="s">&quot;/&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">fun</span><span class="w"> </span><span class="o">_</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">box</span><span class="w"> </span><span class="s">&quot;hello world&quot;</span>
+
+<span class="o">[&lt;</span><span class="n">EntryPoint</span><span class="o">&gt;]</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">main</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">uri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Uri</span><span class="o">(</span><span class="s">&quot;http://localhost:3571&quot;</span><span class="o">)</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HostConfiguration</span><span class="bp">()</span>
+<span class="w">    </span><span class="n">configuration</span><span class="o">.</span><span class="n">RewriteLocalhost</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">false</span>
+
+<span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">NancyHost</span><span class="o">(</span><span class="n">configuration</span><span class="o">,</span><span class="w"> </span><span class="n">uri</span><span class="o">)</span>
+<span class="w">    </span><span class="n">host</span><span class="o">.</span><span class="n">Start</span><span class="bp">()</span>
+
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="o">(</span><span class="s">&quot;Your application is running on &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">uri</span><span class="o">.</span><span class="n">AbsoluteUri</span><span class="o">)</span>
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="o">(</span><span class="s">&quot;Press any [Enter] to close the host.&quot;</span><span class="o">)</span>
+<span class="w">    </span><span class="nn">Console</span><span class="p">.</span><span class="n">ReadLine</span><span class="bp">()</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">ignore</span>
+<span class="w">    </span><span class="mi">0</span>
+</pre></div>
+<p>This should give you a pretty rough idea of how to use Nancy with F#. I suggest
+you check out the other Nancy templates as they show show much more
+functionality. I also recommend the mentioned <a class="reference external" href="http://www.mfranc.com/f/f-and-nancy-beyond-hello-world/">F# centered introduction</a>. I
+will also be writing more articles as my <a class="reference external" href="./category/stuffexchange.html">StuffExchange project</a> progresses.</p>
+</div>
+
+  </div><!-- .content -->
+
+</section>
+
+
+    <!-- footer -->
+    <footer>
+      <p>
+        © Troels Brødsgaard, license <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0</a> Unless otherwise noted.
+        Generated by <a href= "https://docs.getpelican.com/">Pelican</a> with
+        <a href="https://github.com/porterjamesj/crowsfoot">crowsfoot</a> theme.
+      </p>
+    </footer>
+  </body>
+</html>

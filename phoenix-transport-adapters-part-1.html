@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+      <title>Troels Brødsgaard</title>
+      <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,600,700' rel='stylesheet' type='text/css' />
+      <link href='//fonts.googleapis.com/css?family=Merriweather:300' rel='stylesheet' type='text/css'/>
+      <link href='//fonts.googleapis.com/css?family=Source+Code+Pro:200,400,700' rel='stylesheet' type='text/css'/>
+      <link rel="stylesheet" type="text/css" href="./theme/css/icons.min.css"/>
+      <link rel="stylesheet" type="text/css" href="./theme/css/styles.min.css"/>
+      <meta charset="utf-8" />
+  </head>
+
+  <body id="index">
+    <!-- header -->
+    <header class="siteheader">
+      <!-- site image -->
+
+      <div class = "sitebanner">
+	      <h2><a class="sitetitle nodec" href="."><span class="bold-initial">Troels Brødsgaard</span></a></h2>
+        <h3 class ="sitesubtitle">Blurbs on programming</h3>
+        <!-- nav -->
+        <nav class="menu">
+          <ul>
+            <!-- menu items-->
+            <!--pages-->
+            <!-- services icons -->
+              <li><a class="nodec icon-mail-alt" href="mailto:tr@arbr.dk"></a></li>
+              <li><a class="nodec icon-github" href="https://github.com/trarbr"></a></li>
+              <li><a class="nodec icon-twitter"  href="https://twitter.com/trarbr"></a></li>
+          </ul>
+        </nav>
+      </div> <!-- sitebanner -->
+    </header>
+
+    <!-- content -->
+
+<section class="content">
+
+  <h3 class="posttitle">
+    <a class="nodec" href="/phoenix-transport-adapters-part-1.html" rel="bookmark" title="Permalink to Phoenix transport adapters, part 1">
+      Phoenix transport adapters, part 1
+    </a>
+  </h3>
+
+  <div class="postinfo">
+    <p class="published" title="2016-01-30T00:00:00+01:00">
+      Sat 30 January 2016
+    </p>
+
+  </div><!-- .postinfo -->
+
+  <div class="article">
+    <p>This series takes a look at building custom transport adapters
+for the Phoenix framework (currently at version 1.1).
+This post is an introduction to Phoenix transport adapters.
+I briefly describe what a transport adapter does,
+and what is needed to implement one.
+In the next post in this series I will use Telly as example
+of how you can write an adapter.
+Telly is a proof-of-concept transport adapter,
+and uses Telnet as the underlying protocol.</p>
+<p>Phoenix is the name of a neat web framework written in Elixir.
+It is called a &quot;framework for the modern web&quot;
+because it focuses on two-way client-server communication,
+in addition to plain HTTP request/response.</p>
+<p>The Phoenix feature powering two-way communication is called Channels.
+And they are awesome.
+They make it very easy to create applications with two-way communication,
+and everything happens in soft real-time.
+And the best thing is: they do it in a transport-agnostic way.
+This makes it very simple to integrate different devices!
+Imagine web applications where users connect over Websocket to
+monitor and control their IoT devices,
+which are connected over some efficient M2M (machine-to-machine) protcol.
+You can learn more about Channels in the <a class="reference external" href="http://www.phoenixframework.org/docs/channels">official Channel guide</a>.</p>
+<p>If you're new to Phoenix channels,
+I'd suggest checking out <a class="reference external" href="https://github.com/chrismccord/phoenix_chat_example">simple chat example</a>,
+a simple web application for chat built using channels.
+From this point on,
+I will assume you are passingly familiar with the channel terminology.</p>
+<p>In brief, adding a channel to a Phoenix app requires the developer to:</p>
+<ul class="simple">
+<li>add a <cite>socket</cite> to endpoint.ex,
+identifying a <cite>socket path</cite> and <cite>socket handler</cite>.
+The socket handler is an Elixir module
+(e.g. web/user_socket.ex in the simple chat example),
+and contains code to authenticate and identify connections on that socket.</li>
+<li>add one or more channels in the socket handler,
+that can be used from the socket.
+The channel specifies a <cite>topic string</cite>
+(which can contain wildcards),
+and the channel module handling messages for the given topic string.
+This is done with the <tt class="docutils literal">channel</tt> macro.</li>
+<li>add one or more transport adapters in the socket handler,
+by specifying the <cite>transport name</cite> and the adapter module.
+This is done with the <tt class="docutils literal">transport</tt> macro.</li>
+</ul>
+<p>From this, we can get an idea of what is required to create a custom transport.
+First, you must select a transport name.
+Phoenix ships with <cite>:longpolling</cite> and <cite>:websocket</cite> out of the box,
+so using the name of the protcol as transport name might be a good idea.</p>
+<p>Next, you need to write the actual transport adapter. It must be able to:</p>
+<ul class="simple">
+<li>receive connect requests and dispatch those to the correct socket handler.
+Your adapter must have some means of identifying the socket handler.
+This is mostly done using the socket path,
+which will be specified by the connecting client <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a>.
+In addition to the socket handler,
+the adapter must also obtain any parameters needed when connecting.</li>
+<li>once connected,
+decode and dispatch incoming messages from the client.
+The actual dispatch is done by the Phoenix.Socket.Transport module.</li>
+<li>keep track of channels which have been joined on the socket,
+and their associated pids.
+Joining a channel creates a channel process,
+and all further messages sent on that topic must be dispatched
+to that channel process.</li>
+<li>encode and forward outgoing messages to the client.</li>
+</ul>
+<p>There are two parts to every transport adapter: a server and a handler.
+The server must be started as part of your application,
+and must listen for requests from clients.
+These requests should then be dispatched to your transport handler.
+The handler acts as a translator between your protocol
+and the Phoenix channel protocol.
+It connects on the socket handler,
+keeps track of joined channels,
+dispatches incoming messages,
+and forwards outgoing messages.</p>
+<p>Encoding and decoding is done by a serializer module.
+You can either build a custom one for your transport,
+or use a serializer that ships with Phoenix.
+Maybe you want to use protocol buffers?
+Write a serializer for that,
+and ship it with your transport!</p>
+<p>The default configuration for your transport adapter is specified in the
+adapters <tt class="docutils literal">default_config/0</tt> function. It must return a keyword list,
+and should at least specify the default handler for your transport,
+as well as the default serializer.</p>
+<p>How to implement the transport handler will depend on your protocol,
+and the circumstances you're using it under.
+For example,
+handling connect requests with Websockets is pretty straightforward.
+Here the socket path can be specified in the URL,
+while the connect parameters can be passed in the query string.
+It is not as straightforward with all protocols.
+When using a raw TCP protocol you have the freedom to implement whatever
+solution suits your problem best.</p>
+<p>As an example of a custom transport adapter I will take a look at <a class="reference external" href="https://github.com/trarbr/telly">Telly</a>.
+Telly is a transport adapter for the Telnet protocol,
+and in the next post I'll write about the details of it.
+It should help you build your own adapters for other protocols.</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>You could use other means for identifying the socket handler.
+For example,
+you could use a unique TCP port for each socket.
+The port could be a configuration option for the transport handler,
+and could be specified by a developer when adding it to the socket handler.</td></tr>
+</tbody>
+</table>
+
+  </div><!-- .content -->
+
+</section>
+
+
+    <!-- footer -->
+    <footer>
+      <p>
+        © Troels Brødsgaard, license <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0</a> Unless otherwise noted.
+        Generated by <a href= "https://docs.getpelican.com/">Pelican</a> with
+        <a href="https://github.com/porterjamesj/crowsfoot">crowsfoot</a> theme.
+      </p>
+    </footer>
+  </body>
+</html>

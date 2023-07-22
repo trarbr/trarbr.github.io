@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Troels Brødsgaard - StuffExchange</title><link href="https://tr.arbr.dk/" rel="alternate"></link><link href="https://tr.arbr.dk/feeds/stuffexchange.atom.xml" rel="self"></link><id>https://tr.arbr.dk/</id><updated>2015-04-11T00:00:00+02:00</updated><subtitle>Blurbs on programming</subtitle><entry><title>Intro to NancyFx with F#</title><link href="https://tr.arbr.dk/intro-to-nancyfx-with-f.html" rel="alternate"></link><published>2015-04-11T00:00:00+02:00</published><updated>2015-04-11T00:00:00+02:00</updated><author><name>Troels Brødsgaard</name></author><id>tag:tr.arbr.dk,2015-04-11:/intro-to-nancyfx-with-f.html</id><summary type="html">&lt;p class="first last"&gt;Get started with NancyFx in F#!&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="http://nancyfx.org/"&gt;NancyFx&lt;/a&gt; (or just Nancy) is a web application framework for .Net and Mono. I
+chose it for &lt;a class="reference external" href="https://tr.arbr.dk/introducing-stuffexchange.html"&gt;StuffExchange&lt;/a&gt; over Web API because of the focus on Mono
+compatibility, but didn't really spend much time evaluating it. I'm pretty fond
+of it, but unfortunately the documentation is a bit lacking.&lt;/p&gt;
+&lt;p&gt;To be sure, NancyFx does have documentation, but it's spread pretty thin and is
+all C#. That shouldn't be a problem since F# has full C# interoperability, but
+as I'm just learning F#, it makes things a bit trickier. Michal Frank wrote the
+best &lt;a class="reference external" href="http://www.mfranc.com/f/f-and-nancy-beyond-hello-world/"&gt;F# centered introduction&lt;/a&gt; I could find (unfortunately the code snippets
+seem to be missing right now).&lt;/p&gt;
+&lt;div class="section" id="getting-started"&gt;
+&lt;h2&gt;Getting started&lt;/h2&gt;
+&lt;p&gt;The first thing I suggest you do is install the Visual Studio &lt;a class="reference external" href="https://visualstudiogallery.msdn.microsoft.com/b55b8aac-b11a-4a6a-8a77-2153f46f4e2f"&gt;F# Nancy
+Templates&lt;/a&gt; (and &lt;a class="reference external" href="https://visualstudiogallery.msdn.microsoft.com/f1dae7fe-1ecc-4f1b-86b5-32a2970d012a"&gt;F# Web Item Templates&lt;/a&gt;). Then open Visual Studio, create a
+new project and choose the &lt;cite&gt;F# Nancy Applications&lt;/cite&gt; template. I pick &lt;cite&gt;Empty
+Self-Host&lt;/cite&gt;.&lt;/p&gt;
+&lt;p&gt;Note that the versions of Nancy referenced in &lt;cite&gt;packages.config&lt;/cite&gt; might be out of
+date - in my case I get Nancy version 0.17 while Nancy is at 1.1. So I suggest
+you go to the Package Manager Console (Tools &amp;gt;&amp;gt; NuGet Package Manager &amp;gt;&amp;gt;
+Package Manager Console) and type &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;Update-Package&lt;/span&gt;&lt;/tt&gt; which will update all
+packages in the project.&lt;/p&gt;
+&lt;p&gt;The template has a couple of files, but the most interesting one is &lt;cite&gt;Program.fs&lt;/cite&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;module&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;NancyIntro.Program&lt;/span&gt;
+
+&lt;span class="k"&gt;open&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;System&lt;/span&gt;
+&lt;span class="k"&gt;open&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;Nancy.Hosting.Self&lt;/span&gt;
+
+&lt;span class="o"&gt;[&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;EntryPoint&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;]&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;main&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;uri&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Uri&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://localhost:3579&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;NancyHost&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Start&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;WriteLine&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Your application is running on &amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;AbsoluteUri&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;WriteLine&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Press any [Enter] to close the host.&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ReadLine&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ignore&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I suggest you try building and running the app immediately. I get a
+&lt;tt class="docutils literal"&gt;HttpListenerException&lt;/tt&gt;: permission denied. This is because Nancy by default
+rewrites localhost URI's to listen on all interfaces, which my system does not
+allow. This can be fixed by creating a &lt;tt class="docutils literal"&gt;HostConfiguration&lt;/tt&gt; and setting
+&lt;tt class="docutils literal"&gt;RewriteLocalhost&lt;/tt&gt; to &lt;tt class="docutils literal"&gt;false&lt;/tt&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;module&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;NancyIntro.Program&lt;/span&gt;
+
+&lt;span class="k"&gt;open&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;System&lt;/span&gt;
+&lt;span class="k"&gt;open&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;Nancy.Hosting.Self&lt;/span&gt;
+
+&lt;span class="o"&gt;[&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;EntryPoint&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;]&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;main&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;uri&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Uri&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://localhost:3579&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;configuration&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;HostConfiguration&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;configuration&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;RewriteLocalhost&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;false&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;NancyHost&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;configuration&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Start&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;WriteLine&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Your application is running on &amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;AbsoluteUri&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;WriteLine&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Press any [Enter] to close the host.&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ReadLine&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ignore&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you now get a different &lt;tt class="docutils literal"&gt;HttpListenerException&lt;/tt&gt; (can't access file) I
+suggest changing the port number in the URI - it's probably because something
+else is using that port.&lt;/p&gt;
+&lt;p&gt;Once it builds and runs, the terminal will show you which address you can
+access it on. Point your browser there - you should get a 404 error, since we
+haven't defined any routes yet.&lt;/p&gt;
+&lt;p&gt;Defining a route is pretty easy - you define a type, inherit from
+&lt;tt class="docutils literal"&gt;NancyModule&lt;/tt&gt; and then provide the routes for that module. Add below code
+snippet above the &lt;tt class="docutils literal"&gt;main&lt;/tt&gt; function (you will also need to &lt;tt class="docutils literal"&gt;open Nancy&lt;/tt&gt; to
+get access to &lt;tt class="docutils literal"&gt;NancyModule&lt;/tt&gt;):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nc"&gt;IndexModule&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;as&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;inherit&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;NancyModule&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Get&lt;/span&gt;&lt;span class="o"&gt;.[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;_&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;box&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;hello world&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Looks like &lt;tt class="docutils literal"&gt;Get&lt;/tt&gt; is a property that returns a dictionary-like object! And it
+stores functions! Here we store a function that simply returns &lt;cite&gt;hello world&lt;/cite&gt; at
+the route &lt;cite&gt;/&lt;/cite&gt;. You can now build and run your app again and fire up your
+browser. Go to &lt;a class="reference external" href="http://localhost:3579"&gt;http://localhost:3579&lt;/a&gt; (or whatever address Nancy listens on) and
+you should get a plain &amp;quot;hello world&amp;quot; response instead of the 404.&lt;/p&gt;
+&lt;p&gt;The entire &lt;cite&gt;Program.fs&lt;/cite&gt; file now looks like below. You can also checkout the
+&lt;a class="reference external" href="https://github.com/trarbr/trarbr.github.io/tree/62ee08f0a653e58cf177cdb505c5bb1c6d29b0c5/src/NancyIntro"&gt;entire NancyIntro project&lt;/a&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;module&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;NancyIntro.Program&lt;/span&gt;
+
+&lt;span class="k"&gt;open&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;System&lt;/span&gt;
+&lt;span class="k"&gt;open&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;Nancy&lt;/span&gt;
+&lt;span class="k"&gt;open&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nn"&gt;Nancy.Hosting.Self&lt;/span&gt;
+
+&lt;span class="k"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nc"&gt;IndexModule&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;as&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;inherit&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;NancyModule&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Get&lt;/span&gt;&lt;span class="o"&gt;.[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;_&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;box&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;hello world&amp;quot;&lt;/span&gt;
+
+&lt;span class="o"&gt;[&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;EntryPoint&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;]&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;main&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;uri&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Uri&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://localhost:3571&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;configuration&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;HostConfiguration&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;configuration&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;RewriteLocalhost&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;false&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;NancyHost&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;configuration&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Start&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;WriteLine&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Your application is running on &amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;AbsoluteUri&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;WriteLine&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Press any [Enter] to close the host.&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nn"&gt;Console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ReadLine&lt;/span&gt;&lt;span class="bp"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ignore&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This should give you a pretty rough idea of how to use Nancy with F#. I suggest
+you check out the other Nancy templates as they show show much more
+functionality. I also recommend the mentioned &lt;a class="reference external" href="http://www.mfranc.com/f/f-and-nancy-beyond-hello-world/"&gt;F# centered introduction&lt;/a&gt;. I
+will also be writing more articles as my &lt;a class="reference external" href="https://tr.arbr.dk/category/stuffexchange.html"&gt;StuffExchange project&lt;/a&gt; progresses.&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="StuffExchange"></category><category term="F#"></category><category term="FSharp"></category><category term="NancyFx"></category><category term="Nancy"></category></entry><entry><title>Introducing StuffExchange</title><link href="https://tr.arbr.dk/introducing-stuffexchange.html" rel="alternate"></link><published>2015-04-11T00:00:00+02:00</published><updated>2015-04-11T00:00:00+02:00</updated><author><name>Troels Brødsgaard</name></author><id>tag:tr.arbr.dk,2015-04-11:/introducing-stuffexchange.html</id><summary type="html">&lt;p class="first last"&gt;A project I'll work on to learn F#&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;StuffExchange is the name of my current project. It serves two purposes:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;I want to build a product for myself&lt;/li&gt;
+&lt;li&gt;I want to learn a lot of new technology&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="section" id="the-product"&gt;
+&lt;h2&gt;The product&lt;/h2&gt;
+&lt;p&gt;I am not particular fond of stuff. Especially not the kind that just sits there
+in the closet and isn't used anymore. It is out of sight and out of mind, but
+it's still there and it's a waste. Who knows, maybe it could be of
+use to someone else?&lt;/p&gt;
+&lt;p&gt;StuffExchange is about 1) getting rid of stuff quickly and 2) getting stuff for
+free. Got something you don't need? Take a picture, write a short description
+and post it to StuffExchange. Need something, but want it for free?  Search
+StuffExchange, could be someone wants to get rid of just that thing.&lt;/p&gt;
+&lt;p&gt;I have a two-year old daughter. As a baby, she would grow too big for her
+clothes in three weeks. Crazy. Toys? Might be fun for a week.&lt;/p&gt;
+&lt;p&gt;If my girlfriend didn't have a knack for finding things for free (or at least
+cheap) we would've been ruined a long time ago.  And if she didn't have a way
+to get rid of it again, we would've been buried.  So how does she do it?
+Facebook. Turns out there are a lot of Facebook groups which are all about
+getting stuff for cheap and then getting rid of it again.&lt;/p&gt;
+&lt;p&gt;Facebook is not really the best platform though - it has the users, but not the
+interface. So that's the idea behind StuffExchange.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-technology"&gt;
+&lt;h2&gt;The technology&lt;/h2&gt;
+&lt;p&gt;It's not really about the product though. That's just a motivating factor. The
+real purpose of the project is to provide a backdrop for learning.&lt;/p&gt;
+&lt;p&gt;I'm currently in school studying &amp;quot;computer science&amp;quot;. I put that in quotes
+because the school focuses very much on the practicalities of writing software,
+and not so much on the science thing. Understanding business needs, project
+management, writing code that gets the job done. Which I quite like. So far
+we've worked with things like:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Object oriented programming (C# on .NET, 98% desktop apps with WPF but also
+a little WCF and ASP.NET Web Forms)&lt;/li&gt;
+&lt;li&gt;Microsoft SQL Server&lt;/li&gt;
+&lt;li&gt;Object oriented analysis and design (as in Craig Larmans &amp;quot;Applying UML and
+Patterns&amp;quot;)&lt;/li&gt;
+&lt;li&gt;Scrum&lt;/li&gt;
+&lt;li&gt;Business plans&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;But this semester is about specialization, and what I want to do is explore
+some more &amp;quot;exotic&amp;quot; topics. Well, they aren't really that exotic, but compared
+to the &amp;quot;tried and true&amp;quot; focus of the curriculum, what I want to do is quite
+different. Here's what I'm learning/practicing with StuffExchange:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Functional programming (F# on Mono, HTTP API using NancyFx)&lt;/li&gt;
+&lt;li&gt;Domain driven design&lt;/li&gt;
+&lt;li&gt;Command query responsibility segregation&lt;/li&gt;
+&lt;li&gt;Actor model&lt;/li&gt;
+&lt;li&gt;ElasticSearch&lt;/li&gt;
+&lt;li&gt;Vagrant&lt;/li&gt;
+&lt;li&gt;Ansible&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The focus is still on building real software though. I'm not learning all that
+as an academic exercise. I do it because I want to know what it is like to
+build a product with these tools, and how it compares to my &amp;quot;usual&amp;quot; stack.&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="StuffExchange"></category></entry></feed>
