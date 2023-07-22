@@ -29,7 +29,7 @@ EMAIL_ADDRESS = 'tr@arbr.dk'
 GITHUB_ADDRESS = 'https://github.com/trarbr'
 TWITTER_ADDRESS = 'https://twitter.com/trarbr'
 
-LICENSE_URL = 'http://creativecommons.org/licenses/by/4.0/'
+LICENSE_URL = 'https://creativecommons.org/licenses/by/4.0/'
 LICENSE_NAME= 'CC BY 4.0'
 
 THEME = 'crowsfoot'

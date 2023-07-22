@@ -5,7 +5,7 @@ Looks good, puts words on the internet, doesn't do anything fancy.
 
 ## Installation
 
-`git clone https://github.com/porterjamesj/crowsfoot.git`
+`git clone https://github.com/sQu4rks/crowsfoot.git`
 
 Then set the pelican config variable `THEME` to the cloned path.
 
@@ -22,6 +22,8 @@ services by defining the appropriate config variables:
 * `TWITTER_ADDRESS`
 * `FB_ADDRESS` (Facebook)
 
+If you want to use [IndieAuth](https://indieauth.com/) you can set `USE_INDIEAUTH=True` in `pelicanconf.py`. 
+
 An RSS icon will also show on the nav if `FEED_RSS` is set.
 
 There are a few other config variables you should probably set
@@ -36,13 +38,26 @@ the footer.
 single author website, so you can turn this behavior off by setting this
 to `False`
 
-##Screenshot
+## Screenshot
 
-![crowsfoot](https://raw.github.com/porterjamesj/crowsfoot/master/screenshot.jpg)
+![crowsfoot](https://raw.github.com/squ4rks/crowsfoot/master/screenshot.png)
 
-##Live Demo
+## Live Demo
 
-[my website](http://jamesporter.me/)
+[my website](http://marcel.nlogn.org/)
+
+## Attribution 
+
+The theme was originally developed by @porterjamesj
+
+### Hall of Fame 
+
+* [@porterjamesj](https://github.com/porterjamesj)
+* [@sQu4rks](https://github.com/sQu4rks)
+* [@TinaHeiligers](https://github.com/TinaHeiligers)
+* [@mabkenar](https://github.com/mabkenar)
+* [@vaibhavsagar](https://github.com/vaibhavsagar)
+* [@rparrapy](https://github.com/rparrapy)
 
 ## License
 
