@@ -8,6 +8,7 @@ SITESUBTITLE = 'Blurbs on programming'
 SITEURL = ''
 
 PATH = 'content'
+OUTPUT_PATH = 'output-local'
 
 TIMEZONE = 'Europe/Paris'
 

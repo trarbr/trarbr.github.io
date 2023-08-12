@@ -1,6 +1,7 @@
 *.pyc
 *.swp
 /output/
+/output-local/
 /cache/
 /venv/
 
